@@ -1,0 +1,10 @@
+How to use
+
+Run "npm install" to install the required dependencies
+
+Previamente correr tsc --init para que el siguiente comando funque
+con esto se genera el archivo tsconfig.json
+
+Run "tsc" to compile the TypeScript code
+
+Run "npm start" to run the development server (lite-server)
