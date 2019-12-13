@@ -87,3 +87,29 @@ textStorage.addItem("Fernandillo");
 textStorage.addItem("Rapha");
 textStorage.removeItem("Rapha");
 console.log(textStorage.getData());
+
+//Partials nos permite generar un wrapper para un tipo de objeto que necesitemos
+//que se sus atributos sean opcionales y poder declararlo vacio en un inicio
+//e ir llenando los atributos 1 por 1
+interface CourseGoal{
+    title: string,
+    description: string,
+    completeUntil: Date
+}
+
+function createCourseGoal(title: string, description: string, date: Date): CourseGoal{
+    let courseGoal: Partial<CourseGoal> = {};
+    courseGoal.title = title;
+    courseGoal.description = description;
+    courseGoal.completeUntil = date;
+    return courseGoal as CourseGoal;
+}
+
+//Readonly , otro generic utilitario
+//sirve para volver un objeto como inmutable, solo de lectura
+const namesArray: Readonly<string[]> = ['Pedro', 'Martinez'];
+//namesArray.push('Fer'); esto falla
+
+// IMPORTANTE  Generics vs Union Types
+//Generics solo admiten UN tipo de dato para toda una determinada clase o funcion
+//Union types admiten varios tipos de dato para una determinada clase o funcion

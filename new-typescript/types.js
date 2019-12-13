@@ -2,7 +2,7 @@
 var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 function moveAnimal(animal) {
-    var speed;
+    let speed;
     if (animal.type === 'bird') {
         speed = animal.flyingSpeed;
     }
@@ -14,10 +14,10 @@ function moveAnimal(animal) {
 moveAnimal({ type: 'bird', flyingSpeed: 120 });
 ////CASTING
 //const inputElement = <HTMLInputElement>document.getElementById('user-input')!;
-var inputElement = document.getElementById('user-input');
+const inputElement = document.getElementById('user-input');
 console.log(inputElement);
 inputElement.value = 'Hi there!!';
-var errorBag = {
+let errorBag = {
     email: 'Invalid email',
     userName: 'Must star with Capital character.'
 };
@@ -27,13 +27,13 @@ function addition(a, b) {
     }
     return a + b;
 }
-var comoString = addition('Pedro', 'Martinez');
+const comoString = addition('Pedro', 'Martinez');
 //como  los dos argumentos son string y coinciden con uno de los overloads, entonces
 //el resultado es string segun ese overload, por lo tanto podria aplicar un metodo de string al resultado
 console.log(comoString.split(' '));
 //OPTIONAL CHAINING
 //suponemos que esta data llega desde un backend
-var fetchedUserData = {
+const fetchedUserData = {
     id: 'u1',
     name: 'Perico',
     job: { title: 'CEO', description: "My Company" }
@@ -45,7 +45,7 @@ console.log(fetchedUserData.job && fetchedUserData.job.title);
 console.log((_b = (_a = fetchedUserData) === null || _a === void 0 ? void 0 : _a.job) === null || _b === void 0 ? void 0 : _b.title);
 //NULLISH COALESCING
 //el operador "??" sirve para validar si un valor es null o undefined , SOLO CUALQUIERA DE ESOS DOS
-var userInput = '';
+const userInput = '';
 //si userInput fuera null o undefined, el resultado sería DEFAULT
-var storeData = (userInput !== null && userInput !== void 0 ? userInput : 'DEFAULT');
+const storeData = (userInput !== null && userInput !== void 0 ? userInput : 'DEFAULT');
 console.log(storeData);

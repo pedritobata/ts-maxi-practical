@@ -3,7 +3,7 @@ console.log('Bienvenidos a Typescript new!! yeah!!');
 //este es uno de los tipos de datos que introduce TS
 //las tuplas indican una arreglo de tamaño fijo, 2 elementos
 //y los tipos de cada elemento se define exactamente
-var role;
+let role;
 role = [1, 'admin'];
 // role[1] = 3; esto da error
 //Enum
@@ -29,7 +29,7 @@ console.log(Movies.SCARY_MOVIE);
 console.log(Movies.STAR_WARS);
 console.log(Profile.SELLER);
 function combine(input1, input2) {
-    var result;
+    let result;
     if (typeof input1 === 'number' && typeof input2 === 'number') {
         result = input1 + input2;
     }
@@ -58,22 +58,22 @@ function add(n1, n2) {
 function printResult(num) {
     console.log('Result:', num);
 }
-var combineValues = add; //EN otra version de TS, si no especificaba un tipo, este era any por default
+let combineValues = add; //EN otra version de TS, si no especificaba un tipo, este era any por default
 //entonces podía asinar cualquier cosa a esa variable, un numero por ejemplo
 //combineValues = 5;//pero con la version actual de TS ya no se puede!! esto da error
 //asignar un tipo function generico
-var generica;
+let generica;
 generica = add; //esto sí se puede porque generica y add son funciones. sin embargo esto no es muy recomendable
 //por no ser muy preciso.
 printResult(generica(2, 4));
 //Mejor es definir las funciones con su tipo correcto
-var especifica; //esta funcion no recibe argumentos y retorna un number
-especifica = function () {
+let especifica; //esta funcion no recibe argumentos y retorna un number
+especifica = () => {
     return 100;
 };
 //callbacks void
 function addAndHandle(a, b, cb) {
-    var result = a + b;
+    const result = a + b;
     //aunque se especificó void como el retorno de este callback, 
     //TS me permite que el callback devuelva un valor al momento de definirlo en la invocacion de la 
     //funcion principal
@@ -84,7 +84,7 @@ function addAndHandle(a, b, cb) {
     //sin embargo, lo correcto es que mi funcion respete lo que esta definiendo
     cb(result);
 }
-addAndHandle(3, 6, (function (result) {
+addAndHandle(3, 6, (result => {
     console.log(result);
     return result;
 }));

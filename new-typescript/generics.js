@@ -1,14 +1,7 @@
 "use strict";
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 //Some built-in generic types
-var names = [];
+const names = [];
 names.push('Perico');
 //No está funcando con Promises
 // const promise: Promise<string> = new Promise((resolve,reject) => {
@@ -22,7 +15,7 @@ names.push('Perico');
 function merge(objA, objB) {
     return Object.assign(objA, objB);
 }
-var merged = merge({ name: "Tato" }, { age: 44 });
+const merged = merge({ name: "Tato" }, { age: 44 });
 //el objeto merged es el resultante de la funcion generica, en este caso
 //es del tipo interseccion:  {name: string} & {age: number} 
 console.log(merged.age);
@@ -34,10 +27,10 @@ function merge2(objA, objB) {
 }
 //esto no funca porque 30 No es object
 // const merged2 = merge2({name:"Perico"}, 30);
-var merged2 = merge2({ name: "Perico" }, { age: 40 });
+const merged2 = merge2({ name: "Perico" }, { age: 40 });
 //esta funcion devolverá una tupla
 function countAndDescribe(element) {
-    var description = "Got no value.";
+    let description = "Got no value.";
     if (element.length === 1) {
         description = "Got 1 element.";
     }
@@ -53,28 +46,41 @@ function extractAndConvert(obj, key) {
 }
 console.log(extractAndConvert({ name: "Pedro" }, "name"));
 //Generic classes
-var DataStorage = /** @class */ (function () {
-    function DataStorage() {
+class DataStorage {
+    constructor() {
         this.data = [];
     }
-    DataStorage.prototype.addItem = function (item) {
+    addItem(item) {
         this.data.push(item);
-    };
-    DataStorage.prototype.removeItem = function (item) {
+    }
+    removeItem(item) {
         if (this.data.indexOf(item) === -1) {
             return;
         }
         this.data.splice(this.data.indexOf(item), 1);
-    };
-    DataStorage.prototype.getData = function () {
+    }
+    getData() {
         // devolvemos una copia del array para que no se pueda modificar de afuera
-        return __spreadArrays(this.data);
-    };
-    return DataStorage;
-}());
-var textStorage = new DataStorage();
+        return [...this.data];
+    }
+}
+const textStorage = new DataStorage();
 textStorage.addItem("Perico");
 textStorage.addItem("Fernandillo");
 textStorage.addItem("Rapha");
 textStorage.removeItem("Rapha");
 console.log(textStorage.getData());
+function createCourseGoal(title, description, date) {
+    let courseGoal = {};
+    courseGoal.title = title;
+    courseGoal.description = description;
+    courseGoal.completeUntil = date;
+    return courseGoal;
+}
+//Readonly , otro generic utilitario
+//sirve para volver un objeto como inmutable, solo de lectura
+const namesArray = ['Pedro', 'Martinez'];
+//namesArray.push('Fer'); esto falla
+// IMPORTANTE  Generics vs Union Types
+//Generics solo admiten UN tipo de dato para toda una determinada clase o funcion
+//Union types admiten varios tipos de dato para una determinada clase o funcion

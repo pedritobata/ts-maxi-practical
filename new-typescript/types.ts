@@ -79,6 +79,7 @@ console.log(fetchedUserData.job && fetchedUserData.job.title);
 //puedo obtener la misma validacion usando chaining
 console.log(fetchedUserData?.job?.title);
 
+
 //NULLISH COALESCING
 //el operador "??" sirve para validar si un valor es null o undefined , SOLO CUALQUIERA DE ESOS DOS
 const userInput = '';
