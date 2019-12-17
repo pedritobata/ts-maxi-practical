@@ -72,6 +72,27 @@ function Log(target: any, propertyName: string | Symbol){
     console.log(target,propertyName);
 }
 
+//decorator para metodos de acceso (getter o setter) o metodos normales
+//Si el metodo es de instancia target devuelve el prototype de la clase
+//Si el metodo es estatico target devuelve el constructor
+function Log2(target: any, name: string | Symbol, descriptor: PropertyDescriptor){
+    console.log("Method or Accesor Decorator!!");
+    console.log(target);
+    console.log(name);
+    console.log(descriptor);
+}
+
+
+//Decorator de parametros
+//target devuelve lo mismo que el decorator de metodos
+//name es el nombre del metodo que contiene el parametro como argumento, NO el nombre del parametro
+//position es el numero de orden que tiene el parametro en la lista de argumentos (empezando desde 0)
+function Log3(target: any, name: string | Symbol, position: number){
+    console.log("Params Decorator!!");
+    console.log(target);
+    console.log(name);
+    console.log(position);
+}
 
 class Product{
 
@@ -79,6 +100,7 @@ class Product{
     title: string;
     private _price: number;
 
+    @Log2
     set price(val: number){
         if(val > 0){
             this._price = val;
@@ -92,7 +114,8 @@ class Product{
         this._price = price;
     }
 
-    getPriceWithTax(tax: number){
+    @Log2
+    getPriceWithTax(@Log3 tax: number){
         return this._price * (tax + 1);
     }
 }
