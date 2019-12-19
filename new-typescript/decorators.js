@@ -81,7 +81,7 @@ function WithTemplate2(template, hookId) {
     };
 }
 //Cuando hay varios decorators aplicados a un elemento, las funciones decorators como tal se ejecutaran
-//de arriba hacia abajo, desde las mas cercana a la clase hasta la mas lejana
+//de abajo hacia arriba, desde las mas cercana a la clase hasta la mas lejana
 //OJO: las funciones factory Sí se ejecutan de arriba hacia abajo ya que al final se comportan como
 //meras funciones de JS
 let Person = class Person {
@@ -201,3 +201,63 @@ const btn = document.querySelector('#btn2'); //ojo con el "!", recordar que TS s
 //la solucion es el famoso bind!!!!
 //nuestro decorator se encarga de eso
 btn.addEventListener('click', printer.showMessage);
+const registeredValidators = {};
+function Required(target, propName) {
+    //como este decorator afecta a un aributo, recibe como target al PROTOYPE de su clase contenedora y tambien
+    //recibe el nombre del atributo
+    //registramos el validator tipo required
+    //el target (Prototype) contiene como ya se sabe toda la info del objeto, osea, el constructor tambien
+    //y con el constructor, al ser un metodo, se puede acceder a su nombre con la propiedad name
+    registeredValidators[target.constructor.name] = Object.assign(Object.assign({}, registeredValidators[target.constructor.name]), { [propName]: [...registeredValidators[target.constructor.name][propName], 'required'] });
+}
+//este validator se implementa de la misma forma que el anterior
+function PositiveNumber(target, propName) {
+    registeredValidators[target.constructor.name] = Object.assign(Object.assign({}, registeredValidators[target.constructor.name]), { [propName]: [...registeredValidators[target.constructor.name][propName], 'positive'] });
+}
+function validate(obj) {
+    const objValidatorConfig = registeredValidators[obj.constructor.name];
+    //si no hay validator registrado para la clase obtenida con obj, entonces se considera valido
+    if (!objValidatorConfig) {
+        return true;
+    }
+    let isValid = true;
+    for (const prop in objValidatorConfig) {
+        for (const validator of objValidatorConfig[prop]) {
+            switch (validator) {
+                case 'required':
+                    isValid = isValid && !!obj[prop]; //el simbolo !! sirve para convertir el valor a true o false
+                    break;
+                case 'positive':
+                    isValid = isValid && obj[prop] > 0;
+                    break;
+            }
+        }
+    }
+    return isValid;
+}
+class Course {
+    constructor(title, price) {
+        this.title = title;
+        this.price = price;
+    }
+}
+__decorate([
+    Required
+], Course.prototype, "title", void 0);
+__decorate([
+    PositiveNumber
+], Course.prototype, "price", void 0);
+const courseForm = document.querySelector('form');
+courseForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const titleEl = document.getElementById('title');
+    const priceEl = document.getElementById('price');
+    const title = titleEl.value;
+    const price = +priceEl.value; //colocamos el signo + para convertir a numero
+    const createdCourse = new Course(title, price);
+    if (!validate(createdCourse)) {
+        alert('Invalid fields, please try again!!');
+        return;
+    }
+    console.log("Valid inputs!!!!");
+});
