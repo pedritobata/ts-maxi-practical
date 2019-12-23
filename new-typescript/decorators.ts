@@ -231,14 +231,14 @@ function Required(target: any, propName: string){
     registeredValidators[target.constructor.name] = {
         //copiamos los vaidators que ya tenga registrados y luego agregamos el nuevo
         ... registeredValidators[target.constructor.name],
-        [propName]: [...registeredValidators[target.constructor.name][propName],'required']
+        [propName]: ['required']
     }
 }
 //este validator se implementa de la misma forma que el anterior
 function PositiveNumber(target: any, propName: string){
     registeredValidators[target.constructor.name] = {
         ... registeredValidators[target.constructor.name],
-        [propName]: [...registeredValidators[target.constructor.name][propName],'positive']
+        [propName]: ['positive']
     }
 }
 

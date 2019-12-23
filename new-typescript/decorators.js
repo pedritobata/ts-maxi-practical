@@ -208,11 +208,11 @@ function Required(target, propName) {
     //registramos el validator tipo required
     //el target (Prototype) contiene como ya se sabe toda la info del objeto, osea, el constructor tambien
     //y con el constructor, al ser un metodo, se puede acceder a su nombre con la propiedad name
-    registeredValidators[target.constructor.name] = Object.assign(Object.assign({}, registeredValidators[target.constructor.name]), { [propName]: [...registeredValidators[target.constructor.name][propName], 'required'] });
+    registeredValidators[target.constructor.name] = Object.assign(Object.assign({}, registeredValidators[target.constructor.name]), { [propName]: ['required'] });
 }
 //este validator se implementa de la misma forma que el anterior
 function PositiveNumber(target, propName) {
-    registeredValidators[target.constructor.name] = Object.assign(Object.assign({}, registeredValidators[target.constructor.name]), { [propName]: [...registeredValidators[target.constructor.name][propName], 'positive'] });
+    registeredValidators[target.constructor.name] = Object.assign(Object.assign({}, registeredValidators[target.constructor.name]), { [propName]: ['positive'] });
 }
 function validate(obj) {
     const objValidatorConfig = registeredValidators[obj.constructor.name];
