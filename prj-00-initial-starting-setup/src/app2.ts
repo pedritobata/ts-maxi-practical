@@ -13,15 +13,24 @@ class Project{
     }
 }
 
-type Listener = (items: Project[]) => void;
+//Ojo que se pueden definir types genericos!!!
+type Listener<T> = (items: T[]) => void;
 
-class ProjectState{
+class State<T>{
+    protected listeners: Listener<T>[] = [];
+
+    addListener(listener: Listener<T>){
+        this.listeners.push(listener);
+    }
+}
+
+class ProjectState extends State<Project>{
     private projects: Project[] = [];
-    private listeners: Listener[] = [];
+   
     private static instance: ProjectState;
 
     private constructor(){
-
+        super();
     }
 
     static getInstance(){
@@ -30,10 +39,6 @@ class ProjectState{
         }
         this.instance = new ProjectState();
         return this.instance;   
-    }
-
-    addListener(listener: Listener){
-        this.listeners.push(listener);
     }
 
     addProject(title: string, description: string, people: number){
@@ -96,21 +101,98 @@ function autobind(_:any, _2: string, descriptor: PropertyDescriptor){
     return adjDescriptor;
 }
 
-
-class ProjectList{
+/** Clase abstracta que representará un component generico, sería el equivalente a React.Component
+ * 
+ */
+abstract class Component<T extends HTMLElement, U extends HTMLElement>{
     templateElement: HTMLTemplateElement;
-    hostElement: HTMLDivElement;
-    element: HTMLElement;
+    hostElement: T;
+    element: U;
+
+    constructor(templateId: string, hostId: string, insertAtStart: boolean, newElementId?: string){
+        this.templateElement = document.getElementById(templateId)! as HTMLTemplateElement;
+        this.hostElement = document.getElementById(hostId)! as T;
+        const importedNode = document.importNode(this.templateElement.content, true);
+        this.element = importedNode.firstElementChild as U;
+        if(newElementId){
+            this.element.id = newElementId;
+        }
+
+        this.atach(insertAtStart);
+
+    }
+
+
+    atach(insertAtBeginning: boolean) {
+        this.hostElement.insertAdjacentElement(insertAtBeginning? 'afterbegin' : 'beforeend',
+         this.element);
+    }
+
+    //Los metodos abstractos NO pueden ser private en TS!!!
+    abstract configure(): void;
+    abstract renderContent(): void;
+
+}
+
+class ProjectItem extends Component<HTMLUListElement,HTMLLIElement>{
+    project: Project;
+
+    //usamos un getter para que nos devuelva el nnumero de personas
+    //asignadas al project pero formateado para plural o singular segun sea el caso
+    get persons(){
+        if(this.project.people === 1){
+            return '1 Person';
+        }
+        return `${this.project.people} Persons`
+    }
+
+    constructor(hostId: string, project: Project){
+        super('single-project',hostId, false, project.id);
+        this.project = project;
+
+        this.renderContent();
+    }
+
+    configure(){}
+
+    renderContent() {
+        this.element.querySelector('h2')!.textContent = this.project.title;
+        this.element.querySelector('h3')!.textContent = this.persons + ' assigned.';
+        this.element.querySelector('p')!.textContent = this.project.description;
+    }
+}
+
+
+class ProjectList extends Component<HTMLDivElement, HTMLElement>{
+  
     assignedProjects: Project[];
 
     constructor(private type: 'active' | 'finished'){
+        super('project-list','app',false, `${type}-projects`);
         this.assignedProjects = [];
-        this.templateElement = document.getElementById('project-list')! as HTMLTemplateElement;
-        this.hostElement = document.getElementById('app')! as HTMLDivElement;
-        const importedNode = document.importNode(this.templateElement.content, true);
-        this.element = importedNode.firstElementChild as HTMLElement;
-        this.element.id = `${this.type}-projects`;
+        
+        
+        this.configure();
+        this.renderContent();
+    }
 
+    renderProjects(){
+        const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+        listEl.innerHTML = '';
+        for(const prjItem of this.assignedProjects){
+            new ProjectItem(this.element.querySelector('ul')!.id, prjItem);
+        }
+    }
+
+    renderContent(){
+        const listId = `${this.type}-projects-list`;
+        this.element.querySelector('ul')!.id = listId;
+        this.element.querySelector('h2')!.textContent = `${this.type.toUpperCase()} PROJECTS`;
+    }
+
+    //como tenemos que implementar obligatoriamente el metodo configure aprovechamos
+    //para hacer aquí la suscripcion de mi listener al state general
+    configure() {
         projectState.addListener((projects: Project[]) => {
             const filteredProjects = projects.filter(prItem => {
                 if(this.type === 'active'){
@@ -123,56 +205,35 @@ class ProjectList{
             this.renderProjects();
         });
 
-        this.atach();
-        this.renderContent();
     }
-
-    renderProjects(){
-        const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
-        listEl.innerHTML = '';
-        for(const prjItem of this.assignedProjects){
-            const listItem = document.createElement('li');
-            listItem.textContent = prjItem.title;
-            listEl.appendChild(listItem);
-        }
-    }
-
-    renderContent(){
-        const listId = `${this.type}-projects-list`;
-        this.element.querySelector('ul')!.id = listId;
-        this.element.querySelector('h2')!.textContent = `${this.type.toUpperCase()} PROJECTS`;
-    }
-
-    atach() {
-        this.hostElement.insertAdjacentElement('beforeend', this.element);
-    }
+   
 }
 
 
 
-class ProjectInput{
-    templateElement: HTMLTemplateElement;
-    hostElement: HTMLDivElement;
-    element: HTMLFormElement;
+class ProjectInput extends Component<HTMLDivElement,HTMLFormElement>{
+   
     titleInputElement: HTMLInputElement;
     descriptionInputElement: HTMLInputElement;
     peopleInputElement: HTMLInputElement;
 
     constructor(){
-        this.templateElement = document.getElementById('project-input')! as HTMLTemplateElement;
-        this.hostElement = document.getElementById('app')! as HTMLDivElement;
-
-        const importedNode = document.importNode(this.templateElement.content, true);
-        this.element = importedNode.firstElementChild as HTMLFormElement;
-        this.element.id = 'user-input';//en el css hay un estilo especial para ese id!!
-
+        super('project-input','app',true,'user-input');
+        
         this.titleInputElement = this.element.querySelector("#title") as HTMLInputElement;
         this.descriptionInputElement = this.element.querySelector("#description") as HTMLInputElement;
         this.peopleInputElement = this.element.querySelector("#people") as HTMLInputElement;
 
         this.configure();
-        this.atach();
     }
+
+    //Por convencion primero colocamos los metodos public y despues los private
+
+    configure(){
+        this.element.addEventListener('submit', this.submitHandler);
+    }
+
+    renderContent(){}
 
     private clearInputs(){
         this.titleInputElement.value = '';
@@ -224,14 +285,6 @@ class ProjectInput{
        
     }
 
-
-    private configure(){
-        this.element.addEventListener('submit', this.submitHandler);
-    }
-
-    atach(){
-        this.hostElement.insertAdjacentElement('afterbegin', this.element);
-    }
 }
 
 const prjInput = new ProjectInput();
