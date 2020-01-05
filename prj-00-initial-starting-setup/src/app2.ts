@@ -1,6 +1,22 @@
 //truco para no chocar con otros archivos y que se considere este archivo como un modulo independiente!
 export {};
 
+//Drag and Drop interfaces
+//solo nos serviran para definir cuales deben ser los eventos que escucharán mis componentes
+//que sean capaces de drag and drop y deberán implementar un comportamiento para cada evento!!
+//Osea , en resumen, estas interfaces indican cuales serán los listeners que deben implementar!!
+interface Draggable{
+    //DragEvent es un evento propio del DOM
+    dragStartHandler(event: DragEvent): void;
+    dragEndHandler(event: DragEvent): void;
+}
+
+interface DragTarget{
+    dragOverHandler(event: DragEvent): void;
+    dropHandler(event: DragEvent): void;
+    dragLeaveHandler(event: DragEvent): void;
+}
+
 enum ProjectStatus{
     Active,
     Finished
@@ -44,8 +60,21 @@ class ProjectState extends State<Project>{
     addProject(title: string, description: string, people: number){
         const project = new Project( Math.random().toString(),title,description,people, ProjectStatus.Active);
         this.projects.push(project);
+        this.updateListeners();
+    }
+
+    moveProject(projectId: string, newStatus: ProjectStatus){
+        const project = this.projects.find(prj => prj.id === projectId);
+        //si existe el project y solo si ha cambiado de status
+        // refrescamos las listas con el nuevo status
+        if(project && project.status !== newStatus){
+            project.status = newStatus;
+            this.updateListeners();
+        }
+    }
+
+    private updateListeners(){
         for(const listenerFn of this.listeners){
-            console.log('project added');
             listenerFn(this.projects.slice());
         }
     }
@@ -134,7 +163,7 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement>{
 
 }
 
-class ProjectItem extends Component<HTMLUListElement,HTMLLIElement>{
+class ProjectItem extends Component<HTMLUListElement,HTMLLIElement> implements Draggable{
     project: Project;
 
     //usamos un getter para que nos devuelva el nnumero de personas
@@ -150,10 +179,27 @@ class ProjectItem extends Component<HTMLUListElement,HTMLLIElement>{
         super('single-project',hostId, false, project.id);
         this.project = project;
 
+        this.configure();
         this.renderContent();
     }
 
-    configure(){}
+    @autobind
+    dragStartHandler(event: DragEvent){
+        //vamos a transferir data al elemento receptor
+        //el primer argumento es el tipo de data que permitimos transferir
+        //este tipo de dato son palabras reservadas
+        event.dataTransfer!.setData('text/plain', this.project.id);
+        //indicamos al browser que tipo de efecto queremos, en este caso es un move No un copy
+        event.dataTransfer!.effectAllowed = 'move';
+    }
+
+    dragEndHandler(_: DragEvent){
+        console.log('DragEnd');
+    }
+
+    configure(){
+        this.element.addEventListener('dragstart', this.dragStartHandler);
+    }
 
     renderContent() {
         this.element.querySelector('h2')!.textContent = this.project.title;
@@ -163,7 +209,7 @@ class ProjectItem extends Component<HTMLUListElement,HTMLLIElement>{
 }
 
 
-class ProjectList extends Component<HTMLDivElement, HTMLElement>{
+class ProjectList extends Component<HTMLDivElement, HTMLElement> implements DragTarget{
   
     assignedProjects: Project[];
 
@@ -174,6 +220,34 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement>{
         
         this.configure();
         this.renderContent();
+    }
+
+    @autobind
+    dragOverHandler(event: DragEvent){
+        //verificamos que el evento que llega tenga un contenido de texto
+        //lo cual es justamente lo que nos dirá que nuestro componente efectivamente debe recibir 
+        //el drop
+        if(event.dataTransfer && event.dataTransfer!.types[0] === 'text/plain'){
+            //el comportamiento por default del dragOver es NO permitir el drop
+            //asi que lo anulamos para SI permitir el drop
+            event.preventDefault();
+            const listEl = this.element.querySelector("ul")!;
+            listEl.classList.add('droppable');
+        }
+        
+    }
+
+    @autobind
+    dropHandler(event: DragEvent){
+        const prjId = event.dataTransfer!.getData('text/plain');
+        projectState.moveProject(prjId, 
+            this.type === 'active' ? ProjectStatus.Active : ProjectStatus.Finished);
+    }
+
+    @autobind
+    dragLeaveHandler(_: DragEvent){
+        const listEl = this.element.querySelector("ul")!;
+        listEl.classList.remove('droppable');
     }
 
     renderProjects(){
@@ -204,6 +278,10 @@ class ProjectList extends Component<HTMLDivElement, HTMLElement>{
             this.assignedProjects = filteredProjects;
             this.renderProjects();
         });
+
+        this.element.addEventListener('dragover', this.dragOverHandler);
+        this.element.addEventListener('drop', this.dropHandler);
+        this.element.addEventListener('dragleave', this.dragLeaveHandler);
 
     }
    
