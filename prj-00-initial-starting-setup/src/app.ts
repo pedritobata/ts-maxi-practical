@@ -25,6 +25,27 @@
 //  linkear a app.js y ya NO a bundle.js!! y poner el type en "module" (con esto decimos al browser
 // que vamos a utilizar ES6!):
 //  <script type="module" src='dist/app.js'></script>
+// Ademas usando ES6 imports, cada import se convierte en un request al servidor para que nos
+//devuelva ese archivo .js, lo cual genera consumo de tiempo.
+//Para solucionar eso , lo mejor sería usar un bundle que contenga todo el codigo js tal como cuando
+//usamos los namespaces, pero manteniendo las ventajas de ES6 imports. la solucion: WEBPACK!!!
+
+
+/********  USANDO WEBPACK ************/
+//* instalamos los paquetes:
+//npm install --save-dev webpack webpack-cli ts-loader typescript webpack-dev-server
+//* verificar ciertas configuraciones del tsconfig.json:
+//"target": "es6",  puede ser es5 tambien
+//"module": "2015",
+//comentar esto :  "rootDir": "./src",,  ya no se necesitará el rootDir, webpack descifrará nuestro
+//sistema de files
+//* Todos los ES6 imports de mi proyecto YA NO DEBEN INCLUIR LA EXTENSIÓN .js
+//* crear el file webpack.config.js en la carpeta raiz del proyecto (la que queramos que sea la raiz)
+//el nombre del archivo debe ser EXACTAMENTE ESE para que webpack lo reconozca
+//* chekea ahora ese archivo pa' que veas como se configura webpack!!
+
+
+
 
 
 
@@ -44,3 +65,16 @@ const acitveProjects = new ProjectList('active');
 const finishedProjects = new ProjectList('finished'); 
 }
 
+//***** USANDP THRID PARTY LIBRARIES hechas en vanilla js No en typescript */
+//por ejemplo podemos usar un paquete cualquiera que necesitemos, p.e lodash, el cual lo instalamos normal: 
+// npm install lodash
+// cuando lo importamos nos saldrá error al correr la app : import _ from 'lodash';
+// esto pasa porque estamos usando typescript y webpack lo hemos configurado para eso
+// podemos solucionar esto de dos formas:
+//Una forma es cambiar una configuracion en tsconfig:  "noEmitOnError": false,
+//con eso, decimos a TS que compile a pesar qde que hayan errores, y funcará.
+// la mejor solucion es instalar paquetes del tipo types.
+//estos paquetes son una replica de los paquetes originales que estaban en vanilla js y han sido
+//clonados y adaptados a TS!! sus archivos tienen la extension .d.ts 
+//para lodash por ejemplo instalo:  npm install --save-dev @types/lodash
+//solo con instalar eso , mi import:  import _ from 'lodash'; ya funcionará!!! sin necesidad de noEmitOnError
