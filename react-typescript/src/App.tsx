@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import TodoList from './components/TodoList';
+import NewTodo from './components/NewTodo';
+import { Todo } from './todo.model';
 
 //Hemos creado esta aplicacion usando:
 //  npx create-react-app <nombre de mi app> --typescript
@@ -9,11 +11,22 @@ import TodoList from './components/TodoList';
 //App es un functional component que React reconocerá
 const App: React.FC = () => {
 
-  const todos = [{id: 't1', title: 'Finish the course'}]
+  const [todos, setTodos] = useState<Todo[]>([]);
+
+  const addTodoHandler = (text: string) => {
+    setTodos(prevState => [...prevState ,{id: Math.random().toString(), text: text}]);
+  }
+
+  const deleteTodoHandler = (id: string) => {
+    setTodos(prevState => {
+      return prevState.filter(todo => todo.id !== id);
+    });
+  }
 
   return (
     <div className="App">
-       <TodoList items={todos} />
+      <NewTodo onAddTodo={addTodoHandler}/>
+       <TodoList onDeleteTodo={deleteTodoHandler} items={todos} />
     </div>
   );
 }
